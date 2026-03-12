@@ -3,7 +3,7 @@
 // Bump CACHE_VERSION chaque fois que tu pousses une mise à jour
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'tq-v1';
+const CACHE_VERSION = 'tq-v2';
 const ASSETS = [
   './',
   './index.html',
