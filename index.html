@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#05060d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TraderQuest">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRADERQUEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060d;--bg2:#0b0d1a;--bg3:#101326;
+  --cyan:#00e5ff;--cyan2:rgba(0,229,255,.12);--cyan3:rgba(0,229,255,.06);
+  --gold:#ffd700;--gold2:rgba(255,215,0,.1);
+  --green:#00ff88;--green2:rgba(0,255,136,.1);
+  --red:#ff3355;--red2:rgba(255,51,85,.1);
+  --purple:#9d4edd;
+  --text:#dde8ff;--dim:#4a5880;--dim2:#232d48;
+  --border:rgba(0,229,255,.18);
+  --fh:'Orbitron',monospace;--fm:'Share Tech Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--fm);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9999}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--dim2);border-radius:2px}::-webkit-scrollbar-thumb:hover{background:var(--cyan)}
+
+/* ── LAYOUT ── */
+#app{display:flex;min-height:100vh}
+#sidebar{width:68px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:18px 0 12px;position:fixed;top:0;left:0;height:100vh;z-index:100;gap:6px}
+.logo{font-family:var(--fh);font-size:9px;font-weight:900;color:var(--cyan);letter-spacing:3px;writing-mode:vertical-rl;transform:rotate(180deg);margin-bottom:18px;text-shadow:0 0 20px rgba(0,229,255,.5)}
+.nav{width:46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;transition:all .2s;border:1px solid transparent;position:relative;font-size:18px}
+.nav:hover{background:var(--cyan2);border-color:var(--border)}
+.nav.on{background:var(--cyan2);border-color:var(--cyan);box-shadow:0 0 16px rgba(0,229,255,.25)}
+.nav .tip{position:absolute;left:56px;background:var(--bg3);border:1px solid var(--border);padding:4px 10px;border-radius:4px;font-size:10px;color:var(--cyan);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;letter-spacing:1px}
+.nav:hover .tip{opacity:1}
+#main{margin-left:68px;flex:1;padding:24px;max-width:1300px}
+
+/* ── VIEWS ── */
+.view{display:none}.view.on{display:block}
+.ph{margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.pt{font-family:var(--fh);font-size:18px;font-weight:700;color:var(--cyan);letter-spacing:3px;text-shadow:0 0 20px rgba(0,229,255,.4)}
+.ps{font-size:11px;color:var(--dim);margin-top:3px;letter-spacing:1px}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.3),transparent)}
+.ct{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+
+/* ── PLAYER CARD ── */
+.pcard{background:linear-gradient(135deg,#0b0d1a 0%,#0f1124 100%);border:1px solid rgba(0,229,255,.25);border-radius:14px;padding:22px;position:relative;overflow:hidden}
+.pcard::after{content:'';position:absolute;top:-30%;right:-10%;width:220px;height:220px;background:radial-gradient(circle,rgba(0,229,255,.04) 0%,transparent 70%);pointer-events:none}
+.pname{font-family:var(--fh);font-size:20px;font-weight:900;letter-spacing:4px}
+.pcls{font-size:10px;letter-spacing:3px;margin-top:2px}
+.lvlbadge{display:inline-flex;align-items:center;gap:5px;background:var(--gold2);border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:3px 11px;margin-top:7px}
+.lvlbadge span{font-family:var(--fh);font-size:11px;color:var(--gold);font-weight:700}
+
+/* ── XP BAR ── */
+.xpwrap{margin-top:14px}
+.xplbl{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:5px}
+.xpbar{height:7px;background:rgba(0,229,255,.08);border-radius:4px;overflow:hidden;border:1px solid rgba(0,229,255,.15)}
+.xpfill{height:100%;background:linear-gradient(90deg,#0055ff,var(--cyan));border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(0,229,255,.4)}
+
+/* ── GAUGES ── */
+.gauge{display:flex;align-items:center;gap:10px;margin-top:12px}
+.glbl{font-size:10px;color:var(--dim);letter-spacing:2px;white-space:nowrap;min-width:72px}
+.gbar{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.gfill{height:100%;border-radius:3px;transition:width .8s ease,background .5s ease}
+.gval{font-family:var(--fh);font-size:12px;font-weight:700;min-width:32px;text-align:right}
+
+/* ── STAT CHIPS ── */
+.chips{display:flex;gap:7px;margin-top:12px}
+.chip{flex:1;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;padding:7px;text-align:center}
+.chip .v{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--gold)}
+.chip .l{font-size:8px;color:var(--dim);letter-spacing:1px;margin-top:2px;text-transform:uppercase}
+
+/* ── MISSIONS ── */
+.mcard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:15px;position:relative;overflow:hidden;transition:border-color .2s}
+.mcard.done{border-color:var(--green);opacity:.65}
+.mcard.done::after{content:'✓ COMPLÉTÉ';position:absolute;top:8px;right:10px;font-size:8px;color:var(--green);letter-spacing:2px}
+.mtype{font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.mtype.daily{color:#4fc3f7}.mtype.main{color:var(--gold)}.mtype.special{color:var(--purple)}
+.micon{font-size:22px;margin-bottom:6px}
+.mname{font-family:var(--fh);font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.mdesc{font-size:10px;color:var(--dim);line-height:1.55;margin-bottom:10px}
+.mfoot{display:flex;align-items:center;justify-content:space-between}
+.mxp{font-size:11px;color:var(--gold);font-weight:700}
+.mprog{font-size:10px;color:var(--dim)}
+.mpbar{height:2px;background:rgba(255,255,255,.05);border-radius:1px;margin-top:8px;overflow:hidden}
+.mpfill{height:100%;background:linear-gradient(90deg,#0055ff,var(--cyan));border-radius:1px;transition:width .5s ease}
+
+/* ── FORM ── */
+.fsec{margin-bottom:20px}
+.ftitle{font-size:9px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fl{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.fi,.fs,.fa{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:9px 11px;color:var(--text);font-family:var(--fm);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;-webkit-appearance:none}
+.fi:focus,.fs:focus,.fa:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.18)}
+.fs option{background:#0b0d1a}
+.fa{resize:vertical;min-height:76px}
+
+/* ── DIRECTION / RESULT BUTTONS ── */
+.dgrp,.rgrp{display:flex;gap:7px}
+.dbtn,.rbtn{flex:1;padding:9px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--dim);font-family:var(--fh);font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.dbtn:hover,.rbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+.dbtn.on.long{background:var(--green2);border-color:var(--green);color:var(--green)}
+.dbtn.on.short{background:var(--red2);border-color:var(--red);color:var(--red)}
+.rbtn.on.win{background:var(--green2);border-color:var(--green);color:var(--green)}
+.rbtn.on.loss{background:var(--red2);border-color:var(--red);color:var(--red)}
+.rbtn.on.be{background:var(--gold2);border-color:var(--gold);color:var(--gold)}
+
+/* ── COMPLIANCE ── */
+.cklist{background:rgba(0,0,0,.25);border:1px solid rgba(0,229,255,.25);border-radius:10px;overflow:hidden}
+.ckhdr{background:rgba(0,229,255,.04);padding:10px 14px;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:3px;color:var(--cyan)}
+.ckitem{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:background .2s;user-select:none}
+.ckitem:last-child{border-bottom:none}
+.ckitem:hover{background:rgba(0,229,255,.02)}
+.ckbox{width:22px;height:22px;min-width:22px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;margin-top:1px;color:var(--dim)}
+.ckitem.ok .ckbox{background:var(--green2);border-color:var(--green);color:var(--green)}
+.ckitem.fail .ckbox{background:var(--red2);border-color:var(--red);color:var(--red)}
+.cktitle{font-family:var(--fh);font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:3px}
+.ckdesc{font-size:9px;color:var(--dim);line-height:1.6}
+.ckfoot{padding:10px 14px;background:rgba(0,0,0,.2);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ckscore{font-size:11px;color:var(--dim)}
+.ckscore span{font-family:var(--fh);font-size:15px;color:var(--cyan)}
+
+/* ── XP PREVIEW ── */
+.xpprev{background:var(--gold2);border:1px solid rgba(255,215,0,.18);border-radius:8px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.xpprev-l{font-size:9px;color:var(--dim);letter-spacing:2px}
+.xpprev-sub{font-size:9px;color:var(--dim);margin-top:2px}
+.xpprev-v{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--gold)}
+
+/* ── BUTTONS ── */
+.btn{width:100%;padding:12px;background:var(--cyan2);border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:var(--fh);font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(0,229,255,.2);box-shadow:0 0 18px rgba(0,229,255,.25)}
+.btn2{padding:9px 14px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--dim);font-family:var(--fm);font-size:12px;cursor:pointer;transition:all .2s}
+.btn2:hover{border-color:var(--cyan);color:var(--cyan)}
+.btndanger{padding:9px 14px;background:var(--red2);border:1px solid rgba(255,51,85,.3);border-radius:6px;color:var(--red);font-family:var(--fm);font-size:12px;cursor:pointer;transition:all .2s}
+
+/* ── HISTORY TABLE ── */
+.htbl{width:100%;border-collapse:collapse}
+.htbl th{font-size:8px;letter-spacing:2px;color:var(--dim);text-align:left;padding:8px 11px;border-bottom:1px solid var(--border);text-transform:uppercase}
+.htbl td{padding:10px 11px;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px}
+.htbl tr:hover td{background:rgba(0,229,255,.02)}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:1px}
+.bwin{background:var(--green2);color:var(--green);border:1px solid rgba(0,255,136,.25)}
+.bloss{background:var(--red2);color:var(--red);border:1px solid rgba(255,51,85,.25)}
+.bbe{background:var(--gold2);color:var(--gold);border:1px solid rgba(255,215,0,.25)}
+.blong{color:var(--green)}.bshort{color:var(--red)}
+.dots{display:flex;gap:4px}
+.dot{width:8px;height:8px;border-radius:50%}
+.dok{background:var(--green);box-shadow:0 0 4px var(--green)}.dfail{background:var(--red)}.dna{background:var(--dim2)}
+.bicon{width:26px;height:26px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--dim);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
+.bicon:hover{border-color:var(--red);color:var(--red)}
+
+/* ── ACTIVITY ── */
+.feed{display:flex;flex-direction:column;gap:7px}
+.aitem{display:flex;align-items:center;gap:10px;padding:9px 11px;background:rgba(0,0,0,.2);border-radius:6px;border-left:2px solid var(--dim2);font-size:11px}
+.aitem.win{border-left-color:var(--green)}.aitem.loss{border-left-color:var(--red)}.aitem.miss{border-left-color:var(--gold)}
+.atime{color:var(--dim);font-size:9px;white-space:nowrap}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:22px;right:22px;z-index:1000;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.titem{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 18px;font-size:11px;animation:sin .3s ease,sout .3s 2.7s ease forwards;display:flex;align-items:center;gap:8px;max-width:280px;box-shadow:0 0 24px rgba(0,0,0,.6)}
+.titem.ok{border-color:var(--green)}.titem.warn{border-color:var(--gold)}.titem.err{border-color:var(--red)}.titem.miss{border-color:var(--gold);background:rgba(255,215,0,.04)}
+@keyframes sin{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sout{from{opacity:1}to{opacity:0}}
+
+/* ── MODAL ── */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;display:none;align-items:center;justify-content:center}
+#overlay.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:36px;text-align:center;max-width:380px;width:90%;animation:min .3s ease}
+@keyframes min{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal.lvlup{border-color:var(--gold);box-shadow:0 0 50px rgba(255,215,0,.15)}
+.micon2{font-size:44px;margin-bottom:12px}
+.mtitle{font-family:var(--fh);font-size:16px;font-weight:900;letter-spacing:4px;color:var(--cyan);margin-bottom:6px}
+.mxpbig{font-family:var(--fh);font-size:44px;font-weight:900;color:var(--gold);text-shadow:0 0 28px rgba(255,215,0,.5);margin:12px 0}
+.mdesc2{font-size:11px;color:var(--dim);margin-bottom:20px;line-height:1.6}
+
+/* ── SETUP WIZARD ── */
+#wizard{position:fixed;inset:0;background:var(--bg);z-index:600;display:flex;align-items:center;justify-content:center}
+.wcard{background:var(--bg2);border:1px solid rgba(0,229,255,.25);border-radius:18px;padding:44px;max-width:480px;width:92%;text-align:center}
+.wlogo{font-family:var(--fh);font-size:26px;font-weight:900;color:var(--cyan);letter-spacing:6px;text-shadow:0 0 28px rgba(0,229,255,.45);margin-bottom:6px}
+.wsub{font-size:10px;color:var(--dim);letter-spacing:3px;margin-bottom:36px}
+.wform{text-align:left;display:flex;flex-direction:column;gap:14px}
+
+/* ── STATS ── */
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
+.sbig{font-family:var(--fh);font-size:32px;font-weight:700;margin-bottom:3px}
+.ssub{font-size:10px;color:var(--dim)}
+.capcard{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;grid-column:1/-1}
+.capbar{height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;margin:10px 0;border:1px solid var(--border)}
+.capfill{height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:5px;transition:width .8s ease;box-shadow:0 0 12px rgba(0,229,255,.25)}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{padding:9px 18px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+/* ── MISC ── */
+.warn-box{background:var(--red2);border:1px solid rgba(255,51,85,.25);border-radius:7px;padding:10px 14px;font-size:10px;color:var(--red);line-height:1.6}
+.info-box{background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.18);border-radius:7px;padding:10px 14px;font-size:10px;color:var(--cyan);line-height:1.6}
+.empty{text-align:center;padding:50px 20px;color:var(--dim)}
+.empty-ico{font-size:40px;margin-bottom:12px;opacity:.4}
+.sep{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:18px 0}
+.stitle{font-family:var(--fh);font-size:11px;color:var(--cyan);letter-spacing:3px;margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+
+@media(max-width:768px){.g3,.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}#main{padding:14px}}
+@media(max-width:480px){.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ WIZARD ═══════════ -->
+<div id="wizard">
+  <div class="wcard">
+    <div class="wlogo">TRADERQUEST</div>
+    <div class="wsub">SYSTÈME DE GAMIFICATION — TRADING RPG</div>
+    <div class="wform">
+      <div class="fg">
+        <label class="fl">Nom de code (pseudo)</label>
+        <input class="fi" id="w-name" placeholder="Ex: PHANTOM_TRADER" maxlength="20">
+      </div>
+      <div class="frow" style="margin-bottom:0">
+        <div class="fg">
+          <label class="fl">Capital de départ (€)</label>
+          <input class="fi" type="number" id="w-cap" placeholder="1000" min="1">
+        </div>
+        <div class="fg">
+          <label class="fl">Objectif capital (€)</label>
+          <input class="fi" type="number" id="w-goal" placeholder="10000" min="1">
+        </div>
+      </div>
+      <div class="info-box">⚡ Le PnL brut n'est jamais affiché en premier plan. Tu progresses par XP, niveaux et missions — la performance financière devient une conséquence de ta discipline.</div>
+      <button class="btn" onclick="doSetup()">INITIALISER LA MISSION ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ APP ═══════════════ -->
+<div id="app" style="display:none">
+
+  <nav id="sidebar">
+    <div class="logo">TQ</div>
+    <div class="nav on" data-v="dash" onclick="go('dash')">🏠<span class="tip">Dashboard</span></div>
+    <div class="nav" data-v="log" onclick="go('log')">⚡<span class="tip">Log Trade</span></div>
+    <div class="nav" data-v="miss" onclick="go('miss')">🎯<span class="tip">Missions</span></div>
+    <div class="nav" data-v="hist" onclick="go('hist')">📋<span class="tip">Historique</span></div>
+    <div class="nav" data-v="stats" onclick="go('stats')">📊<span class="tip">Statistiques</span></div>
+    <div style="flex:1"></div>
+    <div class="nav" data-v="cfg" onclick="go('cfg')">⚙️<span class="tip">Paramètres</span></div>
+  </nav>
+
+  <main id="main">
+
+    <!-- ─── DASHBOARD ─── -->
+    <div id="v-dash" class="view on">
+      <div class="ph">
+        <div class="pt">MISSION CONTROL</div>
+        <div class="ps" id="ddate">—</div>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="pcard" id="pcard"></div>
+        <div id="today-card"></div>
+      </div>
+      <div class="g2">
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--dim);margin-bottom:10px">▸ MISSIONS DU JOUR</div>
+          <div id="dm-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--dim);margin-bottom:10px">▸ ACTIVITÉ RÉCENTE</div>
+          <div class="feed" id="act-feed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── LOG TRADE ─── -->
+    <div id="v-log" class="view">
+      <div class="ph">
+        <div class="pt">LOG TRADE</div>
+        <div class="ps">VÉRIFICATION DU PROTOCOLE AVANT ENREGISTREMENT</div>
+      </div>
+      <div class="g2">
+        <div>
+          <div class="fsec">
+            <div class="ftitle">Informations Trade</div>
+            <div class="frow">
+              <div class="fg">
+                <label class="fl">Actif / Paire</label>
+                <input class="fi" id="t-asset" placeholder="BTC/USDT, NQ, EUR/USD...">
+              </div>
+              <div class="fg">
+                <label class="fl">Date</label>
+                <input class="fi" type="date" id="t-date">
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl">Direction</label>
+              <div class="dgrp">
+                <button class="dbtn" id="db-long" onclick="setDir('LONG')">▲ LONG</button>
+                <button class="dbtn" id="db-short" onclick="setDir('SHORT')">▼ SHORT</button>
+              </div>
+            </div>
+            <div class="fg" style="margin-top:10px">
+              <label class="fl">Résultat</label>
+              <div class="rgrp">
+                <button class="rbtn" id="rb-win" onclick="setRes('WIN')">✓ WIN</button>
+                <button class="rbtn" id="rb-loss" onclick="setRes('LOSS')">✗ LOSS</button>
+                <button class="rbtn" id="rb-be" onclick="setRes('BE')">= B/E</button>
+              </div>
+            </div>
+            <div class="fg" style="margin-top:10px">
+              <label class="fl">Impact Capital (€) — optionnel</label>
+              <input class="fi" type="number" id="t-pnl" placeholder="+150 ou -80" step="0.01">
+            </div>
+            <div class="fg" style="margin-top:10px">
+              <label class="fl">Notes</label>
+              <textarea class="fa" id="t-notes" placeholder="Contexte, émotions, analyse..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="fsec">
+            <div class="ftitle">⚡ PROTOCOLE DE CONFORMITÉ</div>
+            <div class="cklist">
+              <div class="ckhdr">VÉRIFICATION PRÉ-ENREGISTREMENT</div>
+
+              <div class="ckitem" id="ck-s" onclick="toggleCk('s')">
+                <div class="ckbox" id="cb-s">—</div>
+                <div>
+                  <div class="cktitle">SETUP D'ENTRÉE CONFIRMÉ</div>
+                  <div class="ckdesc">Setup aligné avec la stratégie ? Zone d'entrée validée ? Niveau clé respecté ?</div>
+                </div>
+              </div>
+
+              <div class="ckitem" id="ck-r" onclick="toggleCk('r')">
+                <div class="ckbox" id="cb-r">—</div>
+                <div>
+                  <div class="cktitle">GESTION DE RISQUE OK</div>
+                  <div class="ckdesc">Stop-loss positionné avant l'entrée ? Taille de position calculée ? Ratio R:R ≥ 2:1 ?</div>
+                </div>
+              </div>
+
+              <div class="ckitem" id="ck-p" onclick="toggleCk('p')">
+                <div class="ckbox" id="cb-p">—</div>
+                <div>
+                  <div class="cktitle">ÉTAT PSYCHOLOGIQUE CLAIR</div>
+                  <div class="ckdesc">Aucun FOMO présent ? Pas en mode revenge / tilt ? Mindset objectif et posé ?</div>
+                </div>
+              </div>
+
+              <div class="ckfoot">
+                <div class="ckscore">Score: <span id="ck-score">0</span>/3</div>
+                <div id="ck-rating" style="font-size:10px;color:var(--dim)">— Aucune vérification</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="xpprev">
+            <div>
+              <div class="xpprev-l">XP À GAGNER</div>
+              <div class="xpprev-sub" id="xp-break">Remplissez le formulaire</div>
+            </div>
+            <div class="xpprev-v" id="xp-prev">— XP</div>
+          </div>
+
+          <div id="nc-warn" style="display:none;margin-bottom:12px">
+            <div class="warn-box">⚠ Trade non-conforme. XP réduit. Revérifie ta discipline.</div>
+          </div>
+
+          <button class="btn" onclick="submitTrade()">SOUMETTRE LE TRADE ›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MISSIONS ─── -->
+    <div id="v-miss" class="view">
+      <div class="ph">
+        <div class="pt">MISSIONS</div>
+        <div class="ps">DISCIPLINE · EDGE · PSYCHOLOGIE</div>
+      </div>
+      <div class="tabs">
+        <div class="tab on" onclick="mTab('daily',this)">Quotidiennes</div>
+        <div class="tab" onclick="mTab('main',this)">Principales</div>
+        <div class="tab" onclick="mTab('special',this)">Spéciales</div>
+        <div class="tab" onclick="mTab('custom',this)">✦ Mes Challenges</div>
+      </div>
+      <div id="m-daily"><div id="ml-daily" class="g3"></div></div>
+      <div id="m-main" style="display:none"><div id="ml-main" class="g3"></div></div>
+      <div id="m-special" style="display:none"><div id="ml-special" class="g3"></div></div>
+      <div id="m-custom" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+          <button class="btn" style="width:auto;padding:9px 18px" onclick="openCustomForm()">+ CRÉER UN CHALLENGE</button>
+        </div>
+        <div id="ml-custom" class="g3"></div>
+      </div>
+    </div>
+
+    <!-- ─── HISTORY ─── -->
+    <div id="v-hist" class="view">
+      <div class="ph">
+        <div class="pt">HISTORIQUE</div>
+        <div class="ps">JOURNAL DE GUERRE — CHAQUE TRADE ENREGISTRÉ</div>
+      </div>
+      <div class="card" style="overflow-x:auto">
+        <div id="hist-content"></div>
+      </div>
+    </div>
+
+    <!-- ─── STATS ─── -->
+    <div id="v-stats" class="view">
+      <div class="ph">
+        <div class="pt">STATISTIQUES</div>
+        <div class="ps">PERFORMANCE · DISCIPLINE · EDGE</div>
+      </div>
+      <div id="stats-content"></div>
+    </div>
+
+    <!-- ─── SETTINGS ─── -->
+    <div id="v-cfg" class="view">
+      <div class="ph">
+        <div class="pt">PARAMÈTRES</div>
+        <div class="ps">CONFIGURATION DU SYSTÈME</div>
+      </div>
+      <div style="max-width:580px">
+        <div style="margin-bottom:28px">
+          <div class="stitle">PROFIL</div>
+          <div class="fg"><label class="fl">Nom de code</label><input class="fi" id="cfg-name" maxlength="20"></div>
+          <button class="btn2" onclick="saveName()" style="margin-top:6px">Sauvegarder</button>
+        </div>
+        <div style="margin-bottom:28px">
+          <div class="stitle">OBJECTIFS CAPITAL</div>
+          <div class="frow">
+            <div class="fg"><label class="fl">Capital de départ (€)</label><input class="fi" type="number" id="cfg-start" min="1"></div>
+            <div class="fg"><label class="fl">Objectif final (€)</label><input class="fi" type="number" id="cfg-goal" min="1"></div>
+          </div>
+          <div class="fg"><label class="fl">Capital actuel (€)</label><input class="fi" type="number" id="cfg-cur" min="0"></div>
+          <button class="btn2" onclick="saveCap()" style="margin-top:6px">Sauvegarder</button>
+        </div>
+        <div style="margin-bottom:28px">
+          <div class="stitle">RÈGLES DE STRATÉGIE</div>
+          <div class="frow">
+            <div class="fg"><label class="fl">Risque max / trade (%)</label><input class="fi" type="number" id="cfg-risk" step="0.1" min="0.1"></div>
+            <div class="fg"><label class="fl">R:R minimum requis</label><input class="fi" type="number" id="cfg-rr" step="0.1" min="1"></div>
+          </div>
+          <div class="fg"><label class="fl">Trades max par jour</label><input class="fi" type="number" id="cfg-maxt" min="1" max="20"></div>
+          <button class="btn2" onclick="saveStrat()" style="margin-top:6px">Sauvegarder</button>
+        </div>
+        <div>
+          <div class="stitle">DANGER ZONE</div>
+          <div class="warn-box" style="margin-bottom:10px">⚠ La réinitialisation supprime TOUTES les données. Action irréversible.</div>
+          <button class="btndanger" onclick="resetAll()">RÉINITIALISER TOUTES LES DONNÉES</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ─── MODAL ─── -->
+<div id="overlay"><div class="modal" id="modal-box"></div></div>
+<!-- ─── TOAST ─── -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const LEVELS=[
+  {lv:1,xp:0,title:"ROOKIE",col:"#6b7280"},
+  {lv:2,xp:150,title:"APPRENTICE",col:"#4fc3f7"},
+  {lv:3,xp:400,title:"INITIATE",col:"#29b6f6"},
+  {lv:4,xp:900,title:"WARRIOR",col:"#ab47bc"},
+  {lv:5,xp:2000,title:"VETERAN",col:"#9d4edd"},
+  {lv:6,xp:4000,title:"ELITE",col:"#ffd700"},
+  {lv:7,xp:8000,title:"MASTER",col:"#ff9800"},
+  {lv:8,xp:15000,title:"LEGEND",col:"#ff5722"},
+  {lv:9,xp:30000,title:"MYTHIC",col:"#f44336"},
+  {lv:10,xp:50000,title:"TRANSCENDENT",col:"#00e5ff"}
+];
+
+const DAILY_POOL=[
+  {id:"d1",name:"FRAPPE PRÉCISE",desc:"1 trade 100% conforme au protocole.",xp:35,icon:"🎯",check:(tt)=>tt.some(t=>t.c.s&&t.c.r&&t.c.p)},
+  {id:"d2",name:"IRON DISCIPLINE",desc:"Pas de violation psychologique aujourd'hui.",xp:40,icon:"🧠",check:(tt)=>tt.length>0&&tt.every(t=>t.c.p)},
+  {id:"d3",name:"CHASSEUR PATIENT",desc:"Maximum 2 trades dans la journée.",xp:30,icon:"⏳",check:(tt)=>tt.length>=1&&tt.length<=2},
+  {id:"d4",name:"RISK GUARDIAN",desc:"Conformité risque 100% sur tous les trades.",xp:35,icon:"🛡️",check:(tt)=>tt.length>0&&tt.every(t=>t.c.r)},
+  {id:"d5",name:"LE JOURNALISTE",desc:"Notes détaillées sur tous tes trades.",xp:20,icon:"📝",check:(tt)=>tt.length>0&&tt.every(t=>t.notes&&t.notes.length>10)},
+  {id:"d6",name:"QUALITÉ TOTALE",desc:"Score qualité moyen ≥ 80% sur les trades du jour.",xp:45,icon:"💎",check:(tt)=>tt.length>0&&(tt.reduce((s,t)=>s+t.q,0)/tt.length)>=80},
+  {id:"d7",name:"SETUP HUNTER",desc:"Validation setup d'entrée sur 100% des trades.",xp:30,icon:"🔍",check:(tt)=>tt.length>0&&tt.every(t=>t.c.s)},
+  {id:"d8",name:"BILAN NET",desc:"Enregistre au moins 1 trade aujourd'hui.",xp:15,icon:"⚡",check:(tt)=>tt.length>=1}
+];
+
+const MAIN_MISSIONS=[
+  {id:"m1",name:"PREMIER SANG",desc:"Enregistre ton premier trade.",xp:50,target:1,icon:"⚔️",prog:(S)=>S.trades.length},
+  {id:"m2",name:"INITIATION",desc:"Complète 10 trades 100% conformes.",xp:150,target:10,icon:"🎖️",prog:(S)=>S.trades.filter(t=>t.c.s&&t.c.r&&t.c.p).length},
+  {id:"m3",name:"LA VOIE",desc:"Atteins le Niveau 3.",xp:200,target:2,icon:"📈",prog:(S)=>Math.max(0,S.player.lv-1)},
+  {id:"m4",name:"GUERRIER CONSTANT",desc:"5 trades parfaits consécutifs.",xp:300,target:5,icon:"🔥",prog:(S)=>S.player.maxStreak},
+  {id:"m5",name:"ESPRIT D'ACIER",desc:"30 trades avec psychologie conforme.",xp:350,target:30,icon:"🧠",prog:(S)=>S.trades.filter(t=>t.c.p).length},
+  {id:"m6",name:"100 BATAILLES",desc:"100 trades enregistrés.",xp:500,target:100,icon:"💯",prog:(S)=>S.trades.length},
+  {id:"m7",name:"LE MAÎTRE",desc:"Atteins le Niveau 7.",xp:1000,target:6,icon:"👑",prog:(S)=>Math.max(0,S.player.lv-1)},
+  {id:"m8",name:"QUÊTE CAPITAL I",desc:"Atteins 25% de ton objectif capital.",xp:150,target:25,icon:"💰",prog:(S)=>capPct(S)},
+  {id:"m9",name:"QUÊTE CAPITAL II",desc:"Atteins 50% de ton objectif capital.",xp:300,target:50,icon:"💰",prog:(S)=>capPct(S)},
+  {id:"m10",name:"QUÊTE CAPITAL III",desc:"Objectif capital atteint.",xp:1000,target:100,icon:"🏆",prog:(S)=>capPct(S)}
+];
+
+const SPECIAL_MISSIONS=[
+  {id:"s1",name:"SEMAINE PARFAITE",desc:"7 jours consécutifs avec au moins 1 trade conforme/jour.",xp:500,target:7,icon:"⭐",prog:(S)=>S.specialData.perfectDays||0},
+  {id:"s2",name:"GUERRIER SILENCIEUX",desc:"20 trades consécutifs avec conformité psychologique.",xp:400,target:20,icon:"🥷",prog:(S)=>S.specialData.psychStreak||0},
+  {id:"s3",name:"LE CHIRURGIEN",desc:"15 trades consécutifs avec setup d'entrée validé.",xp:450,target:15,icon:"🔬",prog:(S)=>S.specialData.setupStreak||0},
+  {id:"s4",name:"GHOST PROTOCOL",desc:"5 sessions avec toutes les missions quotidiennes complétées.",xp:300,target:5,icon:"👻",prog:(S)=>S.specialData.dailyStreak||0},
+  {id:"s5",name:"THE ARTISAN",desc:"Score qualité moyen ≥ 90% sur 25 trades.",xp:600,target:25,icon:"🎨",prog:(S)=>S.trades.filter(t=>t.q>=90).length}
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let S=null;
+let pendingLvlUp=null;
+
+function loadS(){
+  const raw=localStorage.getItem('tq2');
+  S=raw?JSON.parse(raw):null;
+}
+function saveS(){localStorage.setItem('tq2',JSON.stringify(S))}
+
+function initS(name,startCap,goalCap){
+  S={
+    player:{name:name.toUpperCase()||"TRADER",lv:1,xp:0,totalXp:0,cls:"ROOKIE",streak:0,maxStreak:0,disc:100,joined:new Date().toISOString()},
+    settings:{startCap:+startCap||1000,goalCap:+goalCap||10000,curCap:+startCap||1000,maxRisk:2,minRR:2,maxTrades:3},
+    trades:[],
+    daily:{lastReset:null,active:[],dailyStreak:0},
+    mainDone:{},
+    specialDone:{},
+    specialData:{perfectDays:0,psychStreak:0,setupStreak:0,dailyStreak:0},
+    customMissions:[]
+  };
+  genDaily();
+  saveS();
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const fmtDate=(iso)=>new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+
+function lvlInfo(xp){
+  let cur=LEVELS[0],nxt=LEVELS[1];
+  for(let i=LEVELS.length-1;i>=0;i--){if(xp>=LEVELS[i].xp){cur=LEVELS[i];nxt=LEVELS[i+1]||null;break;}}
+  return{cur,nxt};
+}
+function xpPct(xp){const{cur,nxt}=lvlInfo(xp);if(!nxt)return 100;return Math.round((xp-cur.xp)/(nxt.xp-cur.xp)*100)}
+function xpToNext(xp){const{nxt}=lvlInfo(xp);return nxt?nxt.xp-xp:0}
+function capPct(state){
+  const{startCap,goalCap,curCap}=state.settings;
+  if(goalCap<=startCap)return 0;
+  return Math.max(0,Math.min(100,Math.round((curCap-startCap)/(goalCap-startCap)*100)));
+}
+
+// ═══════════════════════════════════════════════════════════
+// GAME MATH
+// ═══════════════════════════════════════════════════════════
+function calcXP(c,res){
+  const n=[c.s,c.r,c.p].filter(Boolean).length;
+  let xp=10+n*10;
+  if(n===3){xp+=res==='WIN'?30:res==='LOSS'?10:5}
+  else if(n>=2&&res==='WIN')xp+=8;
+  return xp;
+}
+function calcQ(c,res){
+  const n=[c.s,c.r,c.p].filter(Boolean).length;
+  let q=Math.round(n/3*75);
+  q+=res==='WIN'?(n===3?25:12):res==='BE'?5:0;
+  return Math.min(100,q);
+}
+function discColor(d){return d>=80?'var(--green)':d>=50?'var(--gold)':'var(--red)'}
+
+// ═══════════════════════════════════════════════════════════
+// XP AWARD
+// ═══════════════════════════════════════════════════════════
+function awardXP(amt){
+  const prev=S.player.lv;
+  S.player.xp+=amt;
+  S.player.totalXp+=amt;
+  const{cur}=lvlInfo(S.player.xp);
+  if(cur.lv>prev){
+    S.player.lv=cur.lv;
+    S.player.cls=cur.title;
+    pendingLvlUp=cur;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// DAILY MISSIONS
+// ═══════════════════════════════════════════════════════════
+function genDaily(){
+  const td=todayStr();
+  if(S.daily.lastReset===td)return;
+  const pool=[...DAILY_POOL].sort(()=>Math.random()-.5);
+  S.daily.active=pool.slice(0,3).map(m=>({id:m.id,done:false}));
+  S.daily.lastReset=td;
+}
+
+function checkDaily(trade){
+  const td=todayStr();
+  const tt=S.trades.filter(t=>t.date.startsWith(td));
+  S.daily.active.forEach(dm=>{
+    if(dm.done)return; // already awarded XP, don't re-award
+    const def=DAILY_POOL.find(d=>d.id===dm.id);
+    if(def&&def.check(tt)){
+      dm.done=true;
+      dm.doneDate=td; // track when it was completed
+      awardXP(def.xp);
+      toast(`🎯 ${def.name} — +${def.xp} XP`,'miss');
+    }
+  });
+  // ghost protocol
+  if(S.daily.active.every(d=>d.done)){
+    S.specialData.dailyStreak=(S.specialData.dailyStreak||0)+1;
+  }
+}
+
+// Re-evaluate daily mission display status live (without re-awarding XP)
+function getDailyStatus(dm){
+  const td=todayStr();
+  const tt=S.trades.filter(t=>t.date.startsWith(td));
+  const def=DAILY_POOL.find(d=>d.id===dm.id);
+  if(!def)return false;
+  // A mission is visually "done" only if:
+  // 1. It was awarded XP (dm.done=true) AND it still passes the live check
+  // 2. This prevents showing as done if trades were deleted
+  return dm.done && def.check(tt);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN MISSIONS
+// ═══════════════════════════════════════════════════════════
+function checkMain(){
+  MAIN_MISSIONS.forEach(m=>{
+    if(S.mainDone[m.id])return;
+    const p=m.prog(S);
+    if(p>=m.target){
+      S.mainDone[m.id]=true;
+      awardXP(m.xp);
+      toast(`🏆 ${m.name} complétée ! +${m.xp} XP`,'miss');
+    }
+  });
+  checkCustomMissions();
+  SPECIAL_MISSIONS.forEach(m=>{
+    if(S.specialDone[m.id])return;
+    const p=m.prog(S);
+    if(p>=m.target){
+      S.specialDone[m.id]=true;
+      awardXP(m.xp);
+      toast(`⭐ SPÉCIALE: ${m.name} ! +${m.xp} XP`,'miss');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SPECIAL STREAKS
+// ═══════════════════════════════════════════════════════════
+function updateSpecialData(c){
+  if(c.s){S.specialData.setupStreak=(S.specialData.setupStreak||0)+1}
+  else{S.specialData.setupStreak=0}
+  if(c.p){S.specialData.psychStreak=(S.specialData.psychStreak||0)+1}
+  else{S.specialData.psychStreak=0}
+}
+
+// ═══════════════════════════════════════════════════════════
+// STREAK
+// ═══════════════════════════════════════════════════════════
+function updateStreak(c){
+  if(c.s&&c.r&&c.p){
+    S.player.streak++;
+    if(S.player.streak>S.player.maxStreak)S.player.maxStreak=S.player.streak;
+  }else{S.player.streak=0}
+}
+
+// ═══════════════════════════════════════════════════════════
+// FORM STATE
+// ═══════════════════════════════════════════════════════════
+let F={dir:null,res:null,c:{s:null,r:null,p:null}};
+
+function setDir(d){
+  F.dir=d;
+  document.querySelectorAll('.dbtn').forEach(b=>{b.classList.remove('on','long','short')});
+  document.getElementById('db-'+d.toLowerCase()).classList.add('on',d.toLowerCase());
+  updXP();
+}
+function setRes(r){
+  F.res=r;
+  document.querySelectorAll('.rbtn').forEach(b=>{b.classList.remove('on','win','loss','be')});
+  const map={WIN:'win',LOSS:'loss',BE:'be'};
+  document.getElementById('rb-'+map[r]).classList.add('on',map[r]);
+  updXP();
+}
+function toggleCk(k){
+  const item=document.getElementById('ck-'+k),box=document.getElementById('cb-'+k);
+  if(item.classList.contains('ok')){
+    item.classList.replace('ok','fail');box.textContent='✗';F.c[k]=false;
+  }else if(item.classList.contains('fail')){
+    item.classList.remove('fail');box.textContent='—';F.c[k]=null;
+  }else{
+    item.classList.add('ok');box.textContent='✓';F.c[k]=true;
+  }
+  updCK();updXP();
+}
+function updCK(){
+  const n=[F.c.s,F.c.r,F.c.p].filter(v=>v===true).length;
+  document.getElementById('ck-score').textContent=n;
+  const r=document.getElementById('ck-rating');
+  const opts=[
+    {t:'— Aucune vérification',c:'var(--dim)'},
+    {t:'⚠ Conformité insuffisante',c:'var(--red)'},
+    {t:'◐ Partiellement validé',c:'var(--gold)'},
+    {t:'✓ PROTOCOLE VALIDÉ',c:'var(--green)'}
+  ];
+  r.textContent=opts[n].t;r.style.color=opts[n].c;
+}
+function updXP(){
+  const c={s:F.c.s===true,r:F.c.r===true,p:F.c.p===true};
+  const xp=calcXP(c,F.res||'LOSS');
+  const n=[c.s,c.r,c.p].filter(Boolean).length;
+  document.getElementById('xp-prev').textContent='+'+xp+' XP';
+  document.getElementById('xp-break').textContent=`Base:10 | Conformité:+${n*10}${F.res==='WIN'&&n===3?' | Win parfait:+30':F.res==='WIN'?' | Win:+8':''}`;
+  document.getElementById('nc-warn').style.display=n<3?'block':'none';
+}
+
+function submitTrade(){
+  const asset=document.getElementById('t-asset').value.trim();
+  const date=document.getElementById('t-date').value;
+  const pnl=parseFloat(document.getElementById('t-pnl').value)||0;
+  const notes=document.getElementById('t-notes').value.trim();
+  if(!asset){toast('⚠ Indique l\'actif','warn');return}
+  if(!F.dir){toast('⚠ Sélectionne une direction','warn');return}
+  if(!F.res){toast('⚠ Sélectionne le résultat','warn');return}
+
+  const c={s:F.c.s===true,r:F.c.r===true,p:F.c.p===true};
+  const xp=calcXP(c,F.res),q=calcQ(c,F.res);
+  const trade={id:uid(),date:date?date+'T'+new Date().toTimeString().split(' ')[0]:new Date().toISOString(),asset:asset.toUpperCase(),dir:F.dir,res:F.res,pnl,notes,c,q,xp};
+
+  S.trades.unshift(trade);
+  if(pnl!==0)S.settings.curCap+=pnl;
+  awardXP(xp);
+  updateStreak(c);
+  S.player.disc=Math.max(0,Math.min(100,S.player.disc+([c.s,c.r,c.p].filter(Boolean).length===3?2:-5*[c.s,c.r,c.p].filter(v=>v===false).length)));
+  updateSpecialData(c);
+  checkDaily(trade);
+  checkMain();
+  saveS();
+  showXPModal(xp,q,c);
+  resetForm();
+}
+
+function resetForm(){
+  document.getElementById('t-asset').value='';
+  document.getElementById('t-date').value=todayStr();
+  document.getElementById('t-pnl').value='';
+  document.getElementById('t-notes').value='';
+  F={dir:null,res:null,c:{s:null,r:null,p:null}};
+  document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('on','long','short'));
+  document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('on','win','loss','be'));
+  ['s','r','p'].forEach(k=>{
+    const item=document.getElementById('ck-'+k),box=document.getElementById('cb-'+k);
+    item.classList.remove('ok','fail');box.textContent='—';
+  });
+  updCK();updXP();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════
+function showXPModal(xp,q,c){
+  const n=[c.s,c.r,c.p].filter(Boolean).length;
+  document.getElementById('modal-box').className='modal';
+  document.getElementById('modal-box').innerHTML=`
+    <div class="micon2">${n===3?'⚡':n>=2?'✓':'⚠'}</div>
+    <div class="mtitle">TRADE ENREGISTRÉ</div>
+    <div class="mxpbig">+${xp} XP</div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:14px;font-size:10px;color:var(--dim)">
+      <span>Qualité: <b style="color:${q>=80?'var(--green)':q>=50?'var(--gold)':'var(--red)'};font-family:var(--fh)">${q}%</b></span>
+      <span>|</span>
+      <span>Conf: <b style="color:${n===3?'var(--green)':'var(--gold)'};font-family:var(--fh)">${n}/3</b></span>
+      <span>|</span>
+      <span>Streak: <b style="color:var(--gold);font-family:var(--fh)">${S.player.streak}</b></span>
+    </div>
+    ${n===3?'<div style="font-size:10px;color:var(--green);letter-spacing:1px;margin-bottom:14px">PROTOCOLE PARFAITEMENT RESPECTÉ</div>':''}
+    <button class="btn" onclick="closeModal()">CONTINUER ›</button>
+  `;
+  document.getElementById('overlay').classList.add('on');
+}
+function showLvlModal(lvl){
+  document.getElementById('modal-box').className='modal lvlup';
+  document.getElementById('modal-box').innerHTML=`
+    <div class="micon2">👑</div>
+    <div class="mtitle" style="color:var(--gold)">LEVEL UP !</div>
+    <div style="font-family:var(--fh);font-size:50px;font-weight:900;color:var(--gold);text-shadow:0 0 36px rgba(255,215,0,.5);margin:10px 0">LVL ${lvl.lv}</div>
+    <div style="font-family:var(--fh);font-size:16px;color:${lvl.col};letter-spacing:4px;margin-bottom:14px">${lvl.title}</div>
+    <div class="mdesc2">Ta discipline paye. Continue à affiner ton edge.</div>
+    <button class="btn" onclick="closeModal()">ACCEPTER ›</button>
+  `;
+  document.getElementById('overlay').classList.add('on');
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('on');
+  if(pendingLvlUp){
+    const l=pendingLvlUp;pendingLvlUp=null;
+    setTimeout(()=>showLvlModal(l),120);
+  }else{renderAll()}
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function toast(msg,type='info'){
+  const el=document.createElement('div');
+  el.className=`titem ${type}`;el.textContent=msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.remove(),3100);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function renderPcard(){
+  const{xp,lv,cls,name,streak,maxStreak,disc}=S.player;
+  const{cur,nxt}=lvlInfo(xp);
+  const dc=discColor(disc);
+  document.getElementById('pcard').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div><div class="pname">${name}</div><div class="pcls" style="color:${cur.col}">${cls}</div></div>
+      <div class="lvlbadge"><span>LVL ${lv}</span></div>
+    </div>
+    <div class="xpwrap">
+      <div class="xplbl"><span>XP: ${xp.toLocaleString()}</span><span>${nxt?`→ LVL ${nxt.lv} (${xpToNext(xp)} restant)`:'MAX LEVEL'}</span></div>
+      <div class="xpbar"><div class="xpfill" style="width:${xpPct(xp)}%"></div></div>
+    </div>
+    <div class="gauge" style="margin-top:11px">
+      <span class="glbl">DISCIPLINE</span>
+      <div class="gbar"><div class="gfill" style="width:${disc}%;background:${dc}"></div></div>
+      <span class="gval" style="color:${dc}">${disc}</span>
+    </div>
+    <div class="chips">
+      <div class="chip"><div class="v">${streak}</div><div class="l">Streak</div></div>
+      <div class="chip"><div class="v">${maxStreak}</div><div class="l">Best</div></div>
+      <div class="chip"><div class="v">${S.trades.length}</div><div class="l">Trades</div></div>
+      <div class="chip"><div class="v">${S.player.totalXp.toLocaleString()}</div><div class="l">Total XP</div></div>
+    </div>
+  `;
+}
+
+function renderToday(){
+  const td=todayStr();
+  const tt=S.trades.filter(t=>t.date.startsWith(td));
+  const wins=tt.filter(t=>t.res==='WIN').length,losses=tt.filter(t=>t.res==='LOSS').length;
+  const avgQ=tt.length?Math.round(tt.reduce((s,t)=>s+t.q,0)/tt.length):0;
+  const txp=tt.reduce((s,t)=>s+t.xp,0);
+  const cp=capPct(S);
+  document.getElementById('today-card').innerHTML=`
+    <div class="card" style="height:100%">
+      <div class="ct">AUJOURD'HUI</div>
+      <div class="g2" style="gap:7px;margin-bottom:14px">
+        <div class="chip"><div class="v" style="color:var(--green)">${wins}</div><div class="l">Wins</div></div>
+        <div class="chip"><div class="v" style="color:var(--red)">${losses}</div><div class="l">Losses</div></div>
+        <div class="chip"><div class="v" style="color:var(--gold)">+${txp}</div><div class="l">XP Today</div></div>
+        <div class="chip"><div class="v" style="color:var(--cyan)">${avgQ}%</div><div class="l">Qualité</div></div>
+      </div>
+      <div style="font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:6px">QUÊTE CAPITAL</div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:5px">
+        <span style="color:var(--dim)">Progression</span>
+        <span style="color:var(--cyan);font-family:var(--fh)">${cp}%</span>
+      </div>
+      <div class="capbar"><div class="capfill" style="width:${cp}%"></div></div>
+      <div style="font-size:9px;color:var(--dim);margin-top:4px">${S.settings.curCap.toFixed(0)}€ / ${S.settings.goalCap.toFixed(0)}€</div>
+    </div>
+  `;
+}
+
+function renderDmList(){
+  genDaily();
+  const el=document.getElementById('dm-list');
+  el.innerHTML=S.daily.active.map(dm=>{
+    const def=DAILY_POOL.find(d=>d.id===dm.id);
+    if(!def)return'';
+    const live=getDailyStatus(dm);
+    return`<div class="mcard ${live?'done':''}">
+      <div class="mtype daily">▸ QUOTIDIENNE</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:16px">${def.icon}</span><div class="mname">${def.name}</div></div>
+      <div class="mdesc">${def.desc}</div>
+      <div class="mfoot"><div class="mxp">+${def.xp} XP</div><div class="mprog">${live?'✓ DONE':'EN COURS'}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderFeed(){
+  const el=document.getElementById('act-feed');
+  const recent=S.trades.slice(0,6);
+  if(!recent.length){el.innerHTML='<div class="empty"><div class="empty-ico">📡</div><div>Aucun trade enregistré.<br>Lance ta première mission.</div></div>';return}
+  el.innerHTML=recent.map(t=>{
+    const tc=t.res==='WIN'?'win':t.res==='LOSS'?'loss':'';
+    const col=t.res==='WIN'?'var(--green)':t.res==='LOSS'?'var(--red)':'var(--gold)';
+    const ic=t.res==='WIN'?'✓':t.res==='LOSS'?'✗':'=';
+    const n=[t.c.s,t.c.r,t.c.p].filter(Boolean).length;
+    return`<div class="aitem ${tc}">
+      <span style="color:${col};font-family:var(--fh);font-size:13px">${ic}</span>
+      <div style="flex:1"><div style="font-size:11px">${t.asset} <span style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'}">▸${t.dir}</span></div><div style="font-size:9px;color:var(--dim)">Q:${t.q}% | ${n}/3 ✓</div></div>
+      <div><div style="color:var(--gold);font-size:10px">+${t.xp}XP</div><div class="atime">${fmtDate(t.date)}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderMissions(tab){
+  if(tab==='daily'){
+    genDaily();
+    document.getElementById('ml-daily').innerHTML=S.daily.active.map(dm=>{
+      const def=DAILY_POOL.find(d=>d.id===dm.id);if(!def)return'';
+      const live=getDailyStatus(dm);
+      return`<div class="mcard ${live?'done':''}">
+        <div class="mtype daily">▸ QUOTIDIENNE</div>
+        <div class="micon">${def.icon}</div>
+        <div class="mname">${def.name}</div>
+        <div class="mdesc">${def.desc}</div>
+        <div class="mfoot"><div class="mxp">+${def.xp} XP</div><div class="mprog">${live?'✓ COMPLÉTÉ':'EN COURS'}</div></div>
+      </div>`;
+    }).join('');
+  }
+  if(tab==='main'){
+    document.getElementById('ml-main').innerHTML=MAIN_MISSIONS.map(m=>{
+      const p=Math.min(m.target,m.prog(S));
+      const pct=Math.round(p/m.target*100);
+      const live=p>=m.target; // always re-evaluate live
+      return`<div class="mcard ${live?'done':''}">
+        <div class="mtype main">▸ PRINCIPALE</div>
+        <div class="micon">${m.icon}</div>
+        <div class="mname">${m.name}</div>
+        <div class="mdesc">${m.desc}</div>
+        <div class="mpbar"><div class="mpfill" style="width:${pct}%"></div></div>
+        <div class="mfoot" style="margin-top:8px"><div class="mxp">+${m.xp} XP</div><div class="mprog">${p} / ${m.target}</div></div>
+      </div>`;
+    }).join('');
+  }
+  if(tab==='special'){
+    document.getElementById('ml-special').innerHTML=SPECIAL_MISSIONS.map(m=>{
+      const p=Math.min(m.target,m.prog(S));
+      const pct=Math.round(p/m.target*100);
+      const live=p>=m.target; // always re-evaluate live
+      return`<div class="mcard ${live?'done':''}">
+        <div class="mtype special">▸ SPÉCIALE</div>
+        <div class="micon">${m.icon}</div>
+        <div class="mname">${m.name}</div>
+        <div class="mdesc">${m.desc}</div>
+        <div class="mpbar"><div class="mpfill" style="width:${pct}%"></div></div>
+        <div class="mfoot" style="margin-top:8px"><div class="mxp">+${m.xp} XP</div><div class="mprog">${p} / ${m.target}</div></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderHist(){
+  const el=document.getElementById('hist-content');
+  if(!S.trades.length){el.innerHTML='<div class="empty"><div class="empty-ico">📋</div><div>Aucun trade enregistré.</div></div>';return}
+  el.innerHTML=`<table class="htbl">
+    <thead><tr>
+      <th>Date</th><th>Actif</th><th>Dir</th><th>Résultat</th>
+      <th title="Setup | Risque | Psycho">Conformité</th><th>Qualité</th><th>XP</th><th>Notes</th><th></th>
+    </tr></thead>
+    <tbody>${S.trades.map(t=>{
+      const ds=[t.c.s,t.c.r,t.c.p].map(v=>v===true?'ok':v===false?'fail':'na');
+      const qcol=t.q>=80?'var(--green)':t.q>=50?'var(--gold)':'var(--red)';
+      const rc=t.res==='WIN'?'bwin':t.res==='LOSS'?'bloss':'bbe';
+      const dc=t.dir==='LONG'?'blong':'bshort';
+      return`<tr>
+        <td style="color:var(--dim)">${fmtDate(t.date)}</td>
+        <td style="font-family:var(--fh);font-size:10px">${t.asset}</td>
+        <td><span class="${dc}">${t.dir}</span></td>
+        <td><span class="badge ${rc}">${t.res}</span></td>
+        <td><div class="dots" title="Setup|Risque|Psycho">${ds.map(d=>`<div class="dot d${d}"></div>`).join('')}</div></td>
+        <td style="color:${qcol};font-family:var(--fh)">${t.q}%</td>
+        <td style="color:var(--gold)">+${t.xp}</td>
+        <td style="color:var(--dim);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">${t.notes||'—'}</td>
+        <td><button class="bicon" onclick="delTrade('${t.id}')">✕</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function renderStats(){
+  const el=document.getElementById('stats-content');
+  if(!S.trades.length){el.innerHTML='<div class="empty"><div class="empty-ico">📊</div><div>Pas encore de données.<br>Enregistre tes premiers trades.</div></div>';return}
+  const n=S.trades.length;
+  const wins=S.trades.filter(t=>t.res==='WIN').length;
+  const wr=Math.round(wins/n*100);
+  const avgQ=Math.round(S.trades.reduce((s,t)=>s+t.q,0)/n);
+  const cperfect=S.trades.filter(t=>t.c.s&&t.c.r&&t.c.p).length;
+  const confPct=Math.round(cperfect/n*100);
+  const cs=S.trades.filter(t=>t.c.s).length,cr=S.trades.filter(t=>t.c.r).length,cp2=S.trades.filter(t=>t.c.p).length;
+  const pct=capPct(S);
+  const recent=S.trades.slice(0,20).reverse();
+  const bars=recent.map(t=>{
+    const col=t.q>=80?'var(--green)':t.q>=50?'var(--gold)':'var(--red)';
+    return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="width:100%;background:${col};border-radius:2px 2px 0 0;min-height:2px;height:${t.q*.55}px"></div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="g4" style="margin-bottom:14px">
+      <div class="scard"><div class="ct">WIN RATE</div><div class="sbig" style="color:var(--green)">${wr}%</div><div class="ssub">Hit rate</div></div>
+      <div class="scard"><div class="ct">QUALITÉ MOY.</div><div class="sbig" style="color:var(--cyan)">${avgQ}%</div><div class="ssub">Score moyen</div></div>
+      <div class="scard"><div class="ct">CONFORMITÉ</div><div class="sbig" style="color:var(--gold)">${confPct}%</div><div class="ssub">Trades parfaits</div></div>
+      <div class="scard"><div class="ct">DISCIPLINE</div><div class="sbig" style="color:${discColor(S.player.disc)}">${S.player.disc}</div><div class="ssub">Score actuel</div></div>
+    </div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="scard">
+        <div class="ct">QUALITÉ RÉCENTE (${recent.length} trades)</div>
+        <div style="display:flex;align-items:flex-end;gap:2px;height:70px;margin-top:8px">${bars}</div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:8px;color:var(--dim)"><span>+ ancien</span><span>+ récent</span></div>
+      </div>
+      <div class="scard">
+        <div class="ct">BREAKDOWN CONFORMITÉ</div>
+        ${[
+          {l:'Setup d\'entrée',v:cs,c:'var(--cyan)'},
+          {l:'Gestion risque',v:cr,c:'var(--green)'},
+          {l:'Psychologie',v:cp2,c:'var(--purple)'}
+        ].map(x=>`
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:4px">
+              <span style="color:var(--dim)">${x.l}</span>
+              <span style="color:${x.c}">${Math.round(x.v/n*100)}%</span>
+            </div>
+            <div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden">
+              <div style="height:100%;width:${Math.round(x.v/n*100)}%;background:${x.c};border-radius:2px"></div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="capcard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:3px">QUÊTE CAPITAL</div>
+          <div style="font-family:var(--fh);font-size:20px;color:var(--cyan)">${S.settings.curCap.toFixed(2)}€</div>
+        </div>
+        <div style="text-align:right"><div style="font-size:9px;color:var(--dim)">OBJECTIF</div>
+          <div style="font-family:var(--fh);font-size:15px;color:var(--gold)">${S.settings.goalCap.toFixed(0)}€</div>
+        </div>
+      </div>
+      <div class="capbar"><div class="capfill" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dim)">
+        <span>Départ: ${S.settings.startCap.toFixed(0)}€</span>
+        <span style="color:var(--cyan)">${pct}% accompli</span>
+        <span>Goal: ${S.settings.goalCap.toFixed(0)}€</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderCfg(){
+  document.getElementById('cfg-name').value=S.player.name;
+  document.getElementById('cfg-start').value=S.settings.startCap;
+  document.getElementById('cfg-goal').value=S.settings.goalCap;
+  document.getElementById('cfg-cur').value=S.settings.curCap;
+  document.getElementById('cfg-risk').value=S.settings.maxRisk||2;
+  document.getElementById('cfg-rr').value=S.settings.minRR||2;
+  document.getElementById('cfg-maxt').value=S.settings.maxTrades||3;
+}
+
+function renderAll(){
+  renderPcard();renderToday();renderDmList();renderFeed();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+function saveName(){const n=document.getElementById('cfg-name').value.trim();if(n)S.player.name=n.toUpperCase();saveS();toast('✓ Profil sauvegardé','ok')}
+function saveCap(){
+  S.settings.startCap=parseFloat(document.getElementById('cfg-start').value)||S.settings.startCap;
+  S.settings.goalCap=parseFloat(document.getElementById('cfg-goal').value)||S.settings.goalCap;
+  S.settings.curCap=parseFloat(document.getElementById('cfg-cur').value)||S.settings.curCap;
+  saveS();toast('✓ Capital sauvegardé','ok');
+}
+function saveStrat(){
+  S.settings.maxRisk=parseFloat(document.getElementById('cfg-risk').value)||2;
+  S.settings.minRR=parseFloat(document.getElementById('cfg-rr').value)||2;
+  S.settings.maxTrades=parseInt(document.getElementById('cfg-maxt').value)||3;
+  saveS();toast('✓ Règles sauvegardées','ok');
+}
+function delTrade(id){
+  const t = S.trades.find(x=>x.id===id);
+  if(!t)return;
+  // Deduct XP from this trade
+  deductXPAndRecalc(t.xp);
+  // Reverse capital impact
+  if(t.pnl!==0) S.settings.curCap -= t.pnl;
+  // Remove trade
+  S.trades = S.trades.filter(x=>x.id!==id);
+  // Recalculate streak from scratch
+  let streak=0,max=0;
+  [...S.trades].reverse().forEach(tr=>{
+    if(tr.c.s&&tr.c.r&&tr.c.p){streak++;if(streak>max)max=streak;}
+    else streak=0;
+  });
+  S.player.streak=streak;
+  S.player.maxStreak=max;
+  // Recalculate discipline from scratch
+  let disc=100;
+  [...S.trades].reverse().forEach(tr=>{
+    const n=[tr.c.s,tr.c.r,tr.c.p].filter(Boolean).length;
+    disc=Math.max(0,Math.min(100,disc+(n===3?2:-5*(3-n))));
+  });
+  S.player.disc=disc;
+  // Recalculate special streaks
+  let ss=0,ps=0;
+  S.trades.forEach(tr=>{
+    if(tr.c.s)ss++;else ss=0;
+    if(tr.c.p)ps++;else ps=0;
+  });
+  S.specialData.setupStreak=ss;
+  S.specialData.psychStreak=ps;
+  saveS();
+  renderHist();
+  renderAll();
+  renderStats();
+  toast('Trade supprimé','info');
+}
+function resetAll(){if(confirm('⚠ Réinitialisation complète ? Toutes les données seront perdues.')){localStorage.clear();S=null;location.reload()}}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelector(`[data-v="${v}"]`).classList.add('on');
+  if(v==='dash')renderAll();
+  if(v==='hist')renderHist();
+  if(v==='stats')renderStats();
+  if(v==='cfg')renderCfg();
+  if(v==='miss')renderMissions('daily');
+  if(v==='log'){document.getElementById('t-date').value=todayStr();updXP();updCK()}
+}
+
+function mTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  ['daily','main','special','custom'].forEach(t=>document.getElementById('m-'+t).style.display=t===tab?'block':'none');
+  if(tab==='custom'){renderCustomMissions();}else{renderMissions(tab);}
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════════════════════════
+function doSetup(){
+  const name=document.getElementById('w-name').value.trim();
+  const cap=document.getElementById('w-cap').value;
+  const goal=document.getElementById('w-goal').value;
+  if(!name){toast('⚠ Entre ton nom de code','warn');return}
+  if(!cap||+cap<=0){toast('⚠ Capital invalide','warn');return}
+  if(!goal||+goal<=0){toast('⚠ Objectif invalide','warn');return}
+  initS(name,cap,goal);
+  document.getElementById('wizard').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('ddate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  go('dash');
+  toast('⚡ Bienvenue dans TraderQuest !','ok');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(function init(){
+  loadS();
+  if(!S){
+    document.getElementById('wizard').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }else{
+    document.getElementById('wizard').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('ddate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+    genDaily();checkMain();
+    go('dash');
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════
+// CUSTOM CHALLENGES
+// ═══════════════════════════════════════════════════════════
+let editingCustomId = null;
+
+const COND_META = {
+  manual:     {lbl:null, hint:'Tu valides toi-même en cliquant sur "MARQUER COMPLÉTÉ".'},
+  trades:     {lbl:'Nombre de trades requis', hint:'Sera complété automatiquement quand tu atteins ce nombre de trades.'},
+  perfect:    {lbl:'Nombre de trades 100% conformes requis', hint:'Complété quand tu atteins ce nombre de trades parfaits (setup+risque+psycho).'},
+  winrate:    {lbl:'Win rate minimum (%)', hint:'Complété quand ton win rate global atteint ce pourcentage.'},
+  streak:     {lbl:'Streak parfait minimum', hint:'Complété quand ton streak de trades parfaits consécutifs atteint cette valeur.'},
+  level:      {lbl:'Niveau à atteindre', hint:'Complété automatiquement quand tu atteins ce niveau.'},
+  quality:    {lbl:'Score qualité moyen minimum (%)', hint:'Complété quand la moyenne qualité de tous tes trades atteint ce score.'},
+  discipline: {lbl:'Score discipline minimum', hint:'Complété quand ton score de discipline atteint cette valeur.'}
+};
+
+function updCondUI(){
+  const cond = document.getElementById('cf-cond').value;
+  const meta = COND_META[cond];
+  const wrap = document.getElementById('cf-target-wrap');
+  const hint = document.getElementById('cf-hint');
+  hint.textContent = meta.hint;
+  if(meta.lbl){
+    wrap.style.display='flex';
+    document.getElementById('cf-target-lbl').textContent = meta.lbl;
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function openCustomForm(editId=null){
+  editingCustomId = editId;
+  if(editId){
+    const m = S.customMissions.find(x=>x.id===editId);
+    if(!m)return;
+    document.getElementById('cform-title').textContent = 'MODIFIER LE CHALLENGE';
+    document.getElementById('cf-icon').value = m.icon;
+    document.getElementById('cf-name').value = m.name;
+    document.getElementById('cf-desc').value = m.desc;
+    document.getElementById('cf-type').value = m.type;
+    document.getElementById('cf-xp').value = m.xp;
+    document.getElementById('cf-cond').value = m.cond;
+    document.getElementById('cf-target').value = m.target||'';
+  } else {
+    document.getElementById('cform-title').textContent = 'CRÉER UN CHALLENGE';
+    document.getElementById('cf-icon').value = '';
+    document.getElementById('cf-name').value = '';
+    document.getElementById('cf-desc').value = '';
+    document.getElementById('cf-type').value = 'main';
+    document.getElementById('cf-xp').value = '';
+    document.getElementById('cf-cond').value = 'manual';
+    document.getElementById('cf-target').value = '';
+  }
+  updCondUI();
+  document.getElementById('custom-overlay').style.display='flex';
+}
+function closeCustomForm(){
+  document.getElementById('custom-overlay').style.display='none';
+  editingCustomId=null;
+}
+
+function saveCustomChallenge(){
+  const icon = document.getElementById('cf-icon').value.trim()||'🎯';
+  const name = document.getElementById('cf-name').value.trim();
+  const desc = document.getElementById('cf-desc').value.trim();
+  const type = document.getElementById('cf-type').value;
+  const xp   = parseInt(document.getElementById('cf-xp').value)||50;
+  const cond = document.getElementById('cf-cond').value;
+  const target = cond!=='manual'?(parseInt(document.getElementById('cf-target').value)||1):null;
+  if(!name){toast('⚠ Donne un nom au challenge','warn');return}
+  if(cond!=='manual'&&(!target||target<1)){toast('⚠ Indique une valeur cible valide','warn');return}
+  if(editingCustomId){
+    const m = S.customMissions.find(x=>x.id===editingCustomId);
+    if(m){Object.assign(m,{icon,name,desc,type,xp,cond,target,done:false,manualDone:false});}
+  } else {
+    S.customMissions.push({id:uid(),icon,name,desc,type,xp,cond,target,done:false,manualDone:false,createdAt:new Date().toISOString()});
+  }
+  saveS();
+  closeCustomForm();
+  renderCustomMissions();
+  toast('✦ Challenge enregistré !','ok');
+}
+
+function getCustomProg(m){
+  const n = S.trades.length;
+  const wins = S.trades.filter(t=>t.res==='WIN').length;
+  const perfect = S.trades.filter(t=>t.c.s&&t.c.r&&t.c.p).length;
+  const avgQ = n?Math.round(S.trades.reduce((s,t)=>s+t.q,0)/n):0;
+  switch(m.cond){
+    case 'manual':     return m.manualDone?1:0;
+    case 'trades':     return n;
+    case 'perfect':    return perfect;
+    case 'winrate':    return n?Math.round(wins/n*100):0;
+    case 'streak':     return S.player.maxStreak;
+    case 'level':      return Math.max(0,S.player.lv-1);
+    case 'quality':    return avgQ;
+    case 'discipline': return S.player.disc;
+    default: return 0;
+  }
+}
+function getCustomTarget(m){ return m.cond==='manual'?1:m.target; }
+
+function checkCustomMissions(){
+  if(!S.customMissions) return;
+  S.customMissions.forEach(m=>{
+    if(m.done) return;
+    const p = getCustomProg(m);
+    const t = getCustomTarget(m);
+    if(p>=t){
+      m.done=true;
+      awardXP(m.xp);
+      toast(`✦ ${m.name} — Challenge complété ! +${m.xp} XP`,'miss');
+    }
+  });
+}
+
+function markCustomDone(id){
+  const m = S.customMissions.find(x=>x.id===id);
+  if(!m||m.done)return;
+  m.manualDone=true;
+  m.done=true;
+  awardXP(m.xp);
+  saveS();
+  renderCustomMissions();
+  renderAll();
+  toast(`✦ ${m.name} — Challenge complété ! +${m.xp} XP`,'miss');
+}
+
+function deductXPAndRecalc(xp){
+  S.player.xp=Math.max(0,S.player.xp-xp);
+  S.player.totalXp=Math.max(0,S.player.totalXp-xp);
+  const{cur}=lvlInfo(S.player.xp);
+  S.player.lv=cur.lv;
+  S.player.cls=cur.title;
+  // Recalculate mainDone: remove flags where progress is now below target
+  MAIN_MISSIONS.forEach(m=>{
+    if(!S.mainDone[m.id])return;
+    const p=m.prog(S);
+    if(p<m.target) delete S.mainDone[m.id];
+  });
+  SPECIAL_MISSIONS.forEach(m=>{
+    if(!S.specialDone[m.id])return;
+    const p=m.prog(S);
+    if(p<m.target) delete S.specialDone[m.id];
+  });
+}
+
+function unmarkCustomDone(id){
+  const m = S.customMissions.find(x=>x.id===id);
+  if(!m||!m.done)return;
+  m.manualDone=false;
+  m.done=false;
+  deductXPAndRecalc(m.xp);
+  saveS();
+  renderCustomMissions();
+  renderAll();
+  toast(`↩ ${m.name} — marqué incomplet (-${m.xp} XP)`,'warn');
+}
+
+function deleteCustom(id){
+  const m = S.customMissions.find(x=>x.id===id);
+  if(!m)return;
+  const msg = m.done
+    ? `Supprimer "${m.name}" ? Les ${m.xp} XP obtenus seront retirés.`
+    : `Supprimer "${m.name}" ?`;
+  if(!confirm(msg))return;
+  // If completed, deduct XP and recalculate all flags
+  if(m.done){ deductXPAndRecalc(m.xp); }
+  S.customMissions=S.customMissions.filter(x=>x.id!==id);
+  saveS();
+  renderCustomMissions();
+  renderAll();
+  toast(m.done?`Challenge supprimé (-${m.xp} XP)`:'Challenge supprimé','info');
+}
+
+function renderCustomMissions(){
+  if(!S.customMissions)S.customMissions=[];
+  const el=document.getElementById('ml-custom');
+  if(!el)return;
+  if(!S.customMissions.length){
+    el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">✦</div><div>Aucun challenge perso.<br>Crée ton premier défi !</div></div>';
+    return;
+  }
+  const typeColors={daily:'#4fc3f7',main:'var(--gold)',special:'var(--purple)'};
+  const typeLabels={daily:'QUOTIDIEN',main:'PRINCIPAL',special:'SPÉCIAL'};
+  el.innerHTML=S.customMissions.map(m=>{
+    const p=getCustomProg(m), t=getCustomTarget(m);
+    const pct=Math.min(100,Math.round(p/t*100));
+    const live=p>=t;
+    const condLabel=m.cond==='manual'?'Manuel':`${p} / ${t}`;
+    return`<div class="mcard ${live?'done':''}" style="position:relative">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="mtype" style="color:${typeColors[m.type]||'var(--cyan)'}">▸ ${typeLabels[m.type]||'CUSTOM'} · PERSO</div>
+        <div style="display:flex;gap:5px">
+          ${!live?`<button class="bicon" onclick="openCustomForm('${m.id}')" title="Modifier">✎</button>`:''}
+          <button class="bicon" onclick="deleteCustom('${m.id}')" title="Supprimer">✕</button>
+        </div>
+      </div>
+      <div class="micon">${m.icon}</div>
+      <div class="mname">${m.name}</div>
+      <div class="mdesc">${m.desc}</div>
+      ${m.cond!=='manual'?`<div class="mpbar" style="margin-top:8px"><div class="mpfill" style="width:${pct}%"></div></div>`:''}
+      <div class="mfoot" style="margin-top:10px">
+        <div class="mxp">+${m.xp} XP</div>
+        <div>
+          ${m.cond==='manual'&&!live
+            ?`<button onclick="markCustomDone('${m.id}')" style="background:var(--green2);border:1px solid var(--green);border-radius:5px;color:var(--green);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;font-family:var(--fm)">MARQUER COMPLÉTÉ</button>`
+            :live
+              ?`<button onclick="unmarkCustomDone('${m.id}')" style="background:var(--red2);border:1px solid var(--red);border-radius:5px;color:var(--red);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;font-family:var(--fm)">↩ DÉMARQUER</button>`
+              :`<div class="mprog">${condLabel}</div>`
+          }
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+</script>
+
+<!-- ─── CUSTOM CHALLENGE MODAL ─── -->
+<div id="custom-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:550;display:none;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg2);border:1px solid rgba(0,229,255,.3);border-radius:16px;padding:28px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-family:var(--fh);font-size:14px;color:var(--cyan);letter-spacing:3px" id="cform-title">CRÉER UN CHALLENGE</div>
+      <button onclick="closeCustomForm()" style="background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg">
+        <label class="fl">Icône (emoji)</label>
+        <input class="fi" id="cf-icon" placeholder="🎯" maxlength="4" style="font-size:22px;text-align:center">
+      </div>
+      <div class="fg">
+        <label class="fl">Nom du challenge</label>
+        <input class="fi" id="cf-name" placeholder="Ex: SNIPER ELITE" maxlength="30">
+      </div>
+      <div class="fg">
+        <label class="fl">Description</label>
+        <textarea class="fa" id="cf-desc" placeholder="Décris ton objectif..." style="min-height:60px"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg">
+          <label class="fl">Type</label>
+          <select class="fs" id="cf-type">
+            <option value="daily">Quotidien</option>
+            <option value="main" selected>Principal</option>
+            <option value="special">Spécial</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">XP récompense</label>
+          <input class="fi" type="number" id="cf-xp" placeholder="100" min="10" max="2000">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Condition de complétion</label>
+        <select class="fs" id="cf-cond" onchange="updCondUI()">
+          <option value="manual">Manuel — je valide moi-même</option>
+          <option value="trades">Nombre de trades enregistrés</option>
+          <option value="perfect">Nombre de trades 100% conformes</option>
+          <option value="winrate">Win rate ≥ X% (sur tous les trades)</option>
+          <option value="streak">Streak parfait ≥ X</option>
+          <option value="level">Atteindre le niveau X</option>
+          <option value="quality">Score qualité moyen ≥ X%</option>
+          <option value="discipline">Score discipline ≥ X</option>
+        </select>
+      </div>
+      <div id="cf-target-wrap" class="fg" style="display:none">
+        <label class="fl" id="cf-target-lbl">Valeur cible</label>
+        <input class="fi" type="number" id="cf-target" placeholder="10" min="1">
+      </div>
+      <div class="info-box" id="cf-hint">Les challenges manuels se valident d'un clic depuis la liste.</div>
+      <button class="btn" onclick="saveCustomChallenge()">ENREGISTRER LE CHALLENGE ›</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ── SERVICE WORKER REGISTRATION ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    // Check for updates every time page loads
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;
+      nw.addEventListener('statechange',()=>{
+        if(nw.state==='installed'&&navigator.serviceWorker.controller){
+          // New version available — show update banner
+          const banner=document.createElement('div');
+          banner.style.cssText='position:fixed;top:0;left:0;right:0;background:#0b0d1a;border-bottom:1px solid #00e5ff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;z-index:9000;font-family:monospace;font-size:12px;color:#00e5ff';
+          banner.innerHTML='⚡ Nouvelle version disponible <button onclick="window.location.reload()" style="background:rgba(0,229,255,.15);border:1px solid #00e5ff;color:#00e5ff;padding:4px 12px;border-radius:4px;cursor:pointer;font-family:monospace">METTRE À JOUR</button>';
+          document.body.prepend(banner);
+        }
+      });
+    });
+  });
+  // If SW controller changes (after skipWaiting), reload
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(!refreshing){refreshing=true;window.location.reload();}
+  });
+}
+</script>
+
+</body>
+</html>
